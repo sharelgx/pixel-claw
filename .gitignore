@@ -1,0 +1,47 @@
+# Godot-specific
+*.tscn
+*.tres
+*.scn
+*.import
+*.godot/
+.godot/
+
+# Build results
+*.exe
+*.dll
+*.so
+*.dylib
+*.pck
+*.zip
+*.7z
+.export/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+logs/
+*.log
+
+# User settings
+config/settings.local.json
+
+# Temporary files
+tmp/
+temp/
+
+# Assets sources (keep exported, skip sources)
+assets/sources/
+*.psd
+*.xcf
+*.kra
+*.blend
