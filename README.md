@@ -27,7 +27,45 @@
 
 ## 🛠️ 技术栈
 
-- **引擎**：Godot 4.3 (2D)
+- **引擎**：Godot 4.3+ (2D)
+- **语言**：GDScript
+- **美术**：纯代码生成（Sprite2D）
+
+---
+
+## 🚀 快速开始
+
+📖 **详细安装步骤请见 [QUICKSTART.md](QUICKSTART.md)**
+
+### 最小步骤
+
+1. **克隆并导入**
+```bash
+git clone https://github.com/sharelgx/pixel-claw.git
+cd pixel-claw
+# 打开 Godot → Import → 选择 project.godot
+```
+
+2. **运行**：按 **F6**
+
+3. **操作**：
+   - **1-5** 切换楼层
+   - **空格** 加速时间
+   - 观察 Agent 思想气泡显示的任务标题
+
+---
+
+## 🔌 连接真实 OpenClaw
+
+编辑 `config/settings.json`：
+```json
+{
+  "openclaw": {
+    "enabled": true,
+    "task_board_path": "/Users/liulaoshi/.openclaw/workspace-feishu/shared/TASK_BOARD.md"
+  }
+}
+```
 - **语言**：GDScript
 - **素材**：Aseprite (16x16 像素)
 - **同步**：文件系统监听 + 可选 WebSocket
