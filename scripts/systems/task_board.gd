@@ -10,14 +10,14 @@ var task_board_path: String = ""
 
 func _ready() -> void:
 	var settings = get_node("/root/GameSettings") as GameSettings
-	if settings and settings.get("openclaw", "enabled", false):
-		task_board_path = settings.get("openclaw", "task_board_path", "")
+	if settings and settings.get_setting("openclaw", "enabled", false):
+		task_board_path = settings.get_setting("openclaw", "task_board_path", "")
 	
 	if task_board_path != "":
 		refresh_board()
 		# 启动文件监听定时器
 		var timer = Timer.new()
-		timer.wait_time = settings.get("openclaw", "poll_interval_seconds", 10)
+		timer.wait_time = settings.get_setting("openclaw", "poll_interval_seconds", 10)
 		timer.timeout.connect(_on_poll_timeout)
 		timer.name = "PollTimer"
 		add_child(timer)

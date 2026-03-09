@@ -13,8 +13,8 @@ func _ready() -> void:
 	
 	var settings = get_node("/root/GameSettings") as GameSettings
 	if settings:
-		if settings.get("openclaw", "enabled", false):
-			var mode_str = settings.get("openclaw", "sync_mode", "none")
+		if settings.get_setting("openclaw", "enabled", false):
+			var mode_str = settings.get_setting("openclaw", "sync_mode", "none")
 			match mode_str:
 				"file_watch":
 					sync_mode = SyncMode.FILE_WATCH
@@ -24,7 +24,7 @@ func _ready() -> void:
 					sync_mode = SyncMode.NONE
 			
 			if sync_mode == SyncMode.WEBSOCKET:
-				_connect_websocket(settings.get("openclaw", "websocket_url", ""))
+				_connect_websocket(settings.get_setting("openclaw", "websocket_url", ""))
 	
 	print("[SyncManager] 同步模式: %s" % SyncMode.keys()[sync_mode])
 

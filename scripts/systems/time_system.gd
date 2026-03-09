@@ -17,9 +17,9 @@ var work_end_hour: int = 18
 func _ready() -> void:
 	var settings = get_node("/root/GameSettings") as GameSettings
 	if settings:
-		work_start_hour = settings.get("time", "start_hour", 8)
-		work_end_hour = settings.get("time", "end_hour", 18)
-		time_speed = settings.get("time", "speed_multiplier", 1.0)
+		work_start_hour = settings.get_setting("time", "start_hour", 8)
+		work_end_hour = settings.get_setting("time", "end_hour", 18)
+		time_speed = settings.get_setting("time", "speed_multiplier", 1.0)
 	
 	# 每秒调用 _process_time
 	set_physics_process(true)

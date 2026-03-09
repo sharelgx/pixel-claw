@@ -14,17 +14,29 @@ func load_settings() -> void:
 	# 尝试加载用户配置
 	if FileAccess.file_exists(config_path):
 		var file = FileAccess.open(config_path, FileAccess.READ)
-		settings = JSON.parse_string(file.get_as_text()) or {}
+		var text = file.get_as_text()
 		file.close()
-		print("[GameSettings] 已加载用户配置")
+		var parsed = JSON.parse_string(text)
+		if parsed != null:
+			settings = parsed
+			print("[GameSettings] 已加载用户配置")
+		else:
+			settings = {}
+			print("[GameSettings] 用户配置JSON解析失败，使用空配置")
 	else:
 		# 加载默认配置
 		var default_path = "res://config/settings.json"
 		if ResourceLoader.exists(default_path):
 			var default_file = FileAccess.open(default_path, FileAccess.READ)
-			settings = JSON.parse_string(default_file.get_as_text()) or {}
+			var text = default_file.get_as_text()
 			default_file.close()
-			print("[GameSettings] 已加载默认配置")
+			var parsed = JSON.parse_string(text)
+			if parsed != null:
+				settings = parsed
+				print("[GameSettings] 已加载默认配置")
+			else:
+				settings = get_default_settings()
+				print("[GameSettings] 默认配置JSON解析失败，使用硬编码默认值")
 		else:
 			settings = get_default_settings()
 			print("[GameSettings] 使用硬编码默认值")
@@ -32,7 +44,7 @@ func load_settings() -> void:
 func get_default_settings() -> Dictionary:
 	return {
 		"game": {
-			"title": "OpenClaw Pixel Office",
+			"title": "Pixel-Claw",
 			"version": "0.1.0-dev",
 			"window_width": 1280,
 			"window_height": 720,
@@ -54,12 +66,14 @@ func get_default_settings() -> Dictionary:
 		}
 	}
 
-func get(section: String, key: String, default = null):
+func get_setting(section: String, key: String, default = null):
+	"""获取配置项，例如: get_setting("openclaw", "enabled")"""
 	if settings.has(section) and settings[section].has(key):
 		return settings[section][key]
 	return default
 
-func set(section: String, key: String, value) -> void:
+func set_setting(section: String, key: String, value) -> void:
+	"""设置配置项并保存"""
 	if not settings.has(section):
 		settings[section] = {}
 	settings[section][key] = value
