@@ -1,7 +1,10 @@
-# OpenClaw Pixel Office - 像素办公室模拟器
+# 🎮 OpenClaw Pixel Office
 
-> 🎮 可视化你的 OpenClaw Agent 系统
-> 一个像素风格的 2D 模拟游戏，展示 jarvis、corali 等 agent 在虚拟办公室中工作、摸鱼、完成任务的实时状态。
+[![Godot](https://img.shields.io/badge/Godot-4.3-478CBF?logo=godot-engine)](https://godotengine.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/sharelgx/openclaw-pixel-office)](https://github.com/sharelgx/openclaw-pixel-office/releases)
+
+> 可视化你的 OpenClaw Agent 系统 —— 像素风格的 2D 办公室模拟游戏。
 
 ---
 
