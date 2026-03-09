@@ -18,7 +18,7 @@ var target_position: Vector2 = Vector2.ZERO
 var movement_speed: float = 32.0  # 像素/秒
 var work_animation_timer: float = 0.0
 
-# 视觉元素
+# 视觉元素（运行时创建）
 var sprite: ColorRect
 var name_label: Label
 var thought_bubble: Label
@@ -29,31 +29,41 @@ func _ready() -> void:
 	position = home_position
 	target_position = home_position
 	
-	# 连接任务板
+	# 连接任务板信号
 	var task_board = get_node("/root/TaskBoard") as TaskBoard
 	if task_board:
 		task_board.task_updated.connect(_on_task_updated)
 	
-	print("[Agent:%s] %s 已就位" % [agent_id, display_name])
+	# 启动随机行为定时器
+	var idle_timer = Timer.new()
+	idle_timer.wait_time = 3.0
+	idle_timer.timeout.connect(_on_idle_timer_timeout)
+	idle_timer.name = "IdleTimer"
+	add_child(idle_timer)
+	idle_timer.start()
+	
+	print("[Agent:%s] %s 已就位，位置: %s" % [agent_id, display_name, home_position])
 
 func _create_visuals() -> void:
-	# 主体颜色块（像素人）
+	# Agent 主体（像素人方块）
 	sprite = ColorRect.new()
 	sprite.rect_size = Vector2(20, 28)
 	sprite.color = agent_color
-	sprite.position = Vector2(-10, -28)
+	sprite.position = Vector2(-10, -28)  # 中心对齐
 	add_child(sprite)
 	
 	# 名字标签
 	name_label = Label.new()
+	name_label.name = "NameLabel"
 	name_label.text = display_name if display_name != "" else agent_name
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_label.position = Vector2(-25, -35)
 	name_label.add_theme_font_size_override("font_size", 8)
 	add_child(name_label)
 	
-	# 思想气泡
+	# 思想气泡（任务/状态提示）
 	thought_bubble = Label.new()
+	thought_bubble.name = "ThoughtBubble"
 	thought_bubble.text = ""
 	thought_bubble.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	thought_bubble.add_theme_font_size_override("font_size", 7)
@@ -62,27 +72,22 @@ func _create_visuals() -> void:
 	add_child(thought_bubble)
 
 func _process(delta: float) -> void:
-	match current_state:
-		AgentState.WORKING:
-			work_animation_timer += delta
-			var offset = sin(work_animation_timer * 12) * 1.5
-			sprite.position.y = -28.0 + offset
-		AgentState.WALKING:
-			_move_toward_target(delta)
-		AgentState.ERROR:
-			# 闪烁
-			sprite.modulate.a = 0.6 + 0.4 * sin(Time.get_ticks_msec() * 0.015)
-		AgentState.IDLE:
-			# 空闲时微妙的呼吸效果
-			var breathe = sin(Time.get_ticks_msec() * 0.003) * 0.5 + 0.5
-			sprite.modulate.a = 0.8 + 0.2 * breathe
-			# 小概率触发随机行为
-			if randf() < 0.005:  # ~每3分钟一次（假设60fps）
-				_trigger_random_idle_action()
-		_:
-			pass
+	# 移动处理
+	if current_state == AgentState.WALKING:
+		_move_toward_target(delta)
 	
-	_update_thought_bubble()
+	# 工作动画（打字抖动）
+	if current_state == AgentState.WORKING:
+		work_animation_timer += delta
+		var offset = sin(work_animation_timer * 12) * 1.5
+		sprite.position.y = -28.0 + offset
+		thought_bubble.visible = true
+	elif current_state == AgentState.DRINKING:
+		sprite.position.y = -28.0
+		thought_bubble.visible = true
+	else:
+		sprite.position.y = -28.0
+		thought_bubble.visible = (current_state != AgentState.IDLE)
 
 func _move_toward_target(delta: float) -> void:
 	var direction = (target_position - position).normalized()
@@ -92,13 +97,16 @@ func _move_toward_target(delta: float) -> void:
 	if position.distance_to(target_position) < 4.0:
 		position = target_position
 		current_state = AgentState.IDLE
-		sprite.position.y = -28.0
-		sprite.modulate.a = 1.0
+
+func _on_idle_timer_timeout() -> void:
+	if current_state == AgentState.IDLE:
+		_trigger_random_idle_action()
 
 func _trigger_random_idle_action() -> void:
-	if randf() < 0.5:
+	# 空闲时小概率触发随机行为（摸鱼、走动）
+	if randf() < 0.3:
 		_go_drink_coffee()
-	else:
+	elif randf() < 0.5:
 		_go_random_walk()
 
 func _go_drink_coffee() -> void:
@@ -108,7 +116,8 @@ func _go_drink_coffee() -> void:
 	current_state = AgentState.IDLE
 
 func _go_random_walk() -> void:
-	var bounds = Rect2(150, 100, 800, 500)  # 办公室范围
+	# 在办公室区域内随机游走（子类可重写此函数来自定义范围）
+	var bounds = Rect2(100, 100, 800, 500)
 	target_position = Vector2(
 		randi_range(bounds.position.x, bounds.position.x + bounds.size.x),
 		randi_range(bounds.position.y, bounds.position.y + bounds.size.y)
@@ -135,6 +144,8 @@ func _update_thought_bubble() -> void:
 		AgentState.WORKING:
 			if current_task.has("title"):
 				text = "💼 %s" % current_task["title"].substr(0, 16)
+			else:
+				text = "💼 工作中"
 		AgentState.DRINKING:
 			text = "☕"
 		AgentState.ERROR:
@@ -143,6 +154,8 @@ func _update_thought_bubble() -> void:
 			text = "🤝"
 		AgentState.WALKING:
 			text = "🚶"
+		AgentState.IDLE:
+			text = ""
 	
 	thought_bubble.text = text
 	thought_bubble.visible = (text != "")

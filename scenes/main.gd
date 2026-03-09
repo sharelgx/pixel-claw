@@ -8,19 +8,19 @@ var agents: Dictionary = {}
 @onready var offices_parent: Node2D = $Offices
 
 func _ready() -> void:
-	# 确保系统单例存在（如果用户没设AutoLoad，这里动态创建）
+	# 确保系统单例存在
 	_ensure_singletons()
 	
 	# 生成各楼层
 	_generate_offices()
 	
-	# 生成agents
+	# 生成 Agents
 	_spawn_agents()
 	
-	# 初始视角
+	# 初始视角到2楼
 	_go_to_floor(2)
 	
-	print("\n=== OpenClaw 像素办公室 已启动 ===")
+	print("\n=== OpenClaw Pixel Office 已启动 ===")
 	print("操作指南：")
 	print("  1-5   切换楼层")
 	print("  空格  时间加速")
@@ -28,57 +28,61 @@ func _ready() -> void:
 	print("==============================\n")
 
 func _ensure_singletons() -> void:
-	# 如果 /root 下缺少系统单例，自动创建（避免忘记配置AutoLoad）
+	"""确保核心系统单例已添加到场景树"""
 	var root = get_tree().root
 	
+	# GameSettings
 	if not root.has_node("GameSettings"):
 		var gs = load("res://scripts/systems/game_settings.gd").new()
 		gs.name = "GameSettings"
 		root.add_child(gs)
 	
+	# TimeSystem
 	if not root.has_node("TimeSystem"):
 		var ts = load("res://scripts/systems/time_system.gd").new()
 		ts.name = "TimeSystem"
 		root.add_child(ts)
 	
+	# TaskBoard
 	if not root.has_node("TaskBoard"):
 		var tb = load("res://scripts/systems/task_board.gd").new()
 		tb.name = "TaskBoard"
 		root.add_child(tb)
 	
+	# SyncManager
 	if not root.has_node("SyncManager"):
 		var sm = load("res://scripts/systems/sync_manager.gd").new()
 		sm.name = "SyncManager"
 		root.add_child(sm)
 
 func _generate_offices() -> void:
-	# 每层楼用一个简单的 Node2D 表示
+	"""生成5个楼层场景"""
 	for floor in range(1, 6):
 		var office = Node2D.new()
 		office.name = "Office_%d" % floor
 		office.floor_number = floor
 		office.visible = (floor == current_floor)
 		
-		# 地板背景色（每层略有区分）
+		# 地板背景色（每层略不同）
 		var floor_rect = ColorRect.new()
 		floor_rect.rect_size = Vector2(1200, 800)
-		var gray = 0.9 - (floor * 0.05)
+		var gray = 0.92 - (floor * 0.04)
 		floor_rect.color = Color(gray, gray, gray, 1.0)
 		office.add_child(floor_rect)
 		
-		# 窗户（顶层除外）
+		# 窗户（5层没有）
 		if floor < 5:
 			var window = ColorRect.new()
 			window.rect_position = Vector2(800, 30)
 			window.rect_size = Vector2(300, 150)
-			window.color = Color(0.5, 0.7, 1.0, 0.6)
+			window.color = Color(0.55, 0.75, 1.0, 0.6)
 			office.add_child(window)
 		
-		# 茶水间（放在左侧）
+		# 茶水间（左侧）
 		var kitchen = _create_kitchen(50, 50)
 		office.add_child(kitchen)
 		
-		# 办公桌（每层数量递增）
+		# 办公桌（数量递增）
 		var desk_count = 1 + floor
 		for i in range(desk_count):
 			var x = 150 + i * 220
@@ -87,12 +91,13 @@ func _generate_offices() -> void:
 		
 		# 会议室（4F+）
 		if floor >= 4:
-			var meeting = _create_meeting_room(800, 200)
+			var meeting = _create_meeting_room(850, 180)
 			office.add_child(meeting)
 		
 		offices_parent.add_child(office)
 
 func _create_desk(x: int, y: int) -> Node2D:
+	"""创建办公桌（桌子+显示器+键盘）"""
 	var desk = Node2D.new()
 	desk.position = Vector2(x, y)
 	
@@ -116,6 +121,7 @@ func _create_desk(x: int, y: int) -> Node2D:
 	return desk
 
 func _create_kitchen(x: int, y: int) -> Node2D:
+	"""创建茶水间"""
 	var kitchen = Node2D.new()
 	kitchen.position = Vector2(x, y)
 	
@@ -132,6 +138,7 @@ func _create_kitchen(x: int, y: int) -> Node2D:
 	return kitchen
 
 func _create_meeting_room(x: int, y: int) -> Node2D:
+	"""创建会议室"""
 	var room = Node2D.new()
 	room.position = Vector2(x, y)
 	
@@ -149,6 +156,7 @@ func _create_meeting_room(x: int, y: int) -> Node2D:
 	return room
 
 func _spawn_agents() -> void:
+	"""生成所有 Agent 并放置到对应楼层"""
 	var agent_classes = {
 		"jarvis-feishu": preload("res://scripts/agents/jarvis.gd"),
 		"corali-feishu": preload("res://scripts/agents/corali.gd"),
@@ -161,28 +169,32 @@ func _spawn_agents() -> void:
 		agent.agent_id = agent_id
 		agent.name = agent_id
 		
-		# 根据home_floor放置
-		var office = offices_parent.get_node("Office_%d" % agent.home_floor)
+		# 根据 home_floor 放置到对应楼层
+		var office_name = "Office_%d" % agent.home_floor
+		var office = offices_parent.get_node(office_name)
 		if office:
 			office.add_child(agent)
 			agents[agent_id] = agent
 		else:
+			# 如果楼层不存在，放到主场景
 			add_child(agent)
 			agents[agent_id] = agent
+			print("[Main] 警告: %s 的楼层 %d 不存在，放到主场景" % [agent_id, agent.home_floor])
 	
 	print("[Main] 已生成 %d 个 Agent" % agents.size())
 
 func _go_to_floor(floor: int) -> void:
+	"""切换到指定楼层"""
 	if floor < 1 or floor > 5:
 		return
 	
 	current_floor = floor
 	
-	# 切换可见性
+	# 切换楼层可见性
 	for office in offices_parent.get_children():
 		office.visible = (office.floor_number == floor)
 	
-	# 相机跟随该楼层中心
+	# 相机移动到该楼层中心
 	var target_office = offices_parent.get_node("Office_%d" % floor)
 	if target_office:
 		camera.global_position = target_office.global_position + Vector2(400, 300)
@@ -206,6 +218,7 @@ func _input(event: InputEvent) -> void:
 				_open_debug_console()
 
 func _toggle_time_acceleration() -> void:
+	"""空格键切换时间流速"""
 	var ts = get_node("/root/TimeSystem") as TimeSystem
 	if ts:
 		var speeds = [1.0, 2.0, 5.0, 0.0]
@@ -215,6 +228,7 @@ func _toggle_time_acceleration() -> void:
 		print("[Main] 时间流速: %.1fx" % next)
 
 func _open_debug_console() -> void:
+	"""打开调试控制台（打印命令列表）"""
 	print("\n=== 调试控制台 ===")
 	print("命令列表：")
 	print("  task list [status]      - 列出所有任务")

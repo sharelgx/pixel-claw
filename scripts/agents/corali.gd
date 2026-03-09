@@ -10,20 +10,21 @@ func _ready() -> void:
 	
 	sprite.color = agent_color
 	
-	# 克拉瑞：更喜欢休息
+	# 克拉瑞：每20分钟休息一下
 	var tea_timer = Timer.new()
 	tea_timer.wait_time = 20.0
 	tea_timer.timeout.connect(_on_tea_time)
 	add_child(tea_timer)
 	tea_timer.start()
 	
-	print("[Corali] 克拉瑞已就位")
+	print("[Corali] 克拉瑞已就位，负责执行脚本任务")
 
 func _on_tea_time() -> void:
-	if current_state == AgentState.WORKING or current_state == AgentState.IDLE:
-		_go_drink_coffee()  # 复用喝水动画
+	if current_state in [AgentState.IDLE, AgentState.WORKING]:
+		_go_drink_coffee()
 
 func _go_drink_coffee() -> void:
 	current_state = AgentState.DRINKING
-	await get_tree().create_timer(2.0).timeout
+	_update_thought_bubble()
+	await get_tree().create_timer(2.5).timeout
 	current_state = AgentState.IDLE
