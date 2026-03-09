@@ -70,8 +70,8 @@ func _parse_tasks(markdown: String) -> void:
 			if not header_parsed:
 				continue
 			
-			# 解析表格行
-			var cells = line.split("|")
+			# 解析表格行（分割 | ，跳过首尾空）
+			var cells = line.split("|", false)
 			if cells.size() >= 7:
 				var task_id = cells[1].strip_edges()
 				var title = cells[2].strip_edges()
@@ -79,6 +79,9 @@ func _parse_tasks(markdown: String) -> void:
 				var status = cells[4].strip_edges()
 				var due = cells[5].strip_edges()
 				var notes = cells[6].strip_edges()
+				
+				# 清理 title 中的 markdown 格式（如 **bold**）
+				title = title.replace("**", "").replace("__", "")
 				
 				tasks[task_id] = {
 					"id": task_id,
@@ -91,6 +94,10 @@ func _parse_tasks(markdown: String) -> void:
 				}
 				
 				task_updated.emit(task_id, tasks[task_id])
+				
+				# 调试输出
+				if task_id == "T-20250309-01":
+					print("[TaskBoard] 关键任务加载: %s - %s (owner: %s)" % [task_id, title, owner])
 
 func _normalize_status(status: String) -> String:
 	var s = status.to_upper()

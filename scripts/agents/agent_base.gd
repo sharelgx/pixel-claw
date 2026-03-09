@@ -76,10 +76,10 @@ func _process(delta: float) -> void:
 	if current_state == AgentState.WALKING:
 		_move_toward_target(delta)
 	
-	# 工作动画（打字抖动）
+	# 工作动画（打字抖动） - 更快更流畅
 	if current_state == AgentState.WORKING:
 		work_animation_timer += delta
-		var offset = sin(work_animation_timer * 12) * 1.5
+		var offset = sin(work_animation_timer * 20) * 1.2
 		sprite.position.y = -28.0 + offset
 		thought_bubble.visible = true
 	elif current_state == AgentState.DRINKING:
@@ -143,19 +143,28 @@ func _update_thought_bubble() -> void:
 	match current_state:
 		AgentState.WORKING:
 			if current_task.has("title"):
-				text = "💼 %s" % current_task["title"].substr(0, 16)
+				# 直接显示任务标题，不超过 12 字（确保可读）
+				text = "💼 %s" % current_task["title"].substr(0, 12)
 			else:
 				text = "💼 工作中"
 		AgentState.DRINKING:
 			text = "☕"
 		AgentState.ERROR:
-			text = "❌"
+			# 显示阻塞原因（如果有）
+			if current_task.has("notes") and current_task["notes"] != "":
+				text = "❌ %s" % current_task["notes"].substr(0, 8)
+			else:
+				text = "❌ 阻塞"
 		AgentState.MEETING:
-			text = "🤝"
+			text = "🤝 会议"
 		AgentState.WALKING:
 			text = "🚶"
 		AgentState.IDLE:
-			text = ""
+			# 空闲时偶尔显示 thought bubble 提示
+			if randf() < 0.3:
+				text = ["😊", "💭", "🎵"][randi() % 3]
+			else:
+				text = ""
 	
 	thought_bubble.text = text
 	thought_bubble.visible = (text != "")

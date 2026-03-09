@@ -182,6 +182,25 @@ func _spawn_agents() -> void:
 			print("[Main] 警告: %s 的楼层 %d 不存在，放到主场景" % [agent_id, agent.home_floor])
 	
 	print("[Main] 已生成 %d 个 Agent" % agents.size())
+	
+	# 延迟 0.5 秒后强制刷新一次任务状态（确保 TaskBoard 已加载）
+	await get_tree().create_timer(0.5).timeout
+	_force_assign_tasks()
+
+func _force_assign_tasks() -> void:
+	"""强制为已存在的 agent 分配当前任务"""
+	var task_board = get_node("/root/TaskBoard") as TaskBoard
+	if not task_board:
+		return
+	
+	for agent_id in agents:
+		var agent = agents[agent_id]
+		var tasks = task_board.get_tasks_by_owner(agent_id)
+		if tasks.size() > 0:
+			agent.set_task(tasks[0])
+			print("[Main] 已为 %s 分配任务: %s" % [agent_id, tasks[0].get("title", "无标题")])
+		else:
+			print("[Main] %s 当前无任务" % agent_id)
 
 func _go_to_floor(floor: int) -> void:
 	"""切换到指定楼层"""
