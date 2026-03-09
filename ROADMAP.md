@@ -177,7 +177,7 @@
 
 ## 💡 如何参与
 
-1. Fork 本仓库：https://github.com/sharelgx/openclaw-pixel-office
+1. Fork 本仓库：https://github.com/sharelgx/pixel-claw
 2. 创建特性分支：`git checkout -b feature/your-idea`
 3. 提交 PR，描述清晰
 4. 交流：GitHub Issues 或 OpenClaw Discord

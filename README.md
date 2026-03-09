@@ -2,7 +2,7 @@
 
 [![Godot](https://img.shields.io/badge/Godot-4.3-478CBF?logo=godot-engine)](https://godotengine.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/sharelgx/openclaw-pixel-office)](https://github.com/sharelgx/openclaw-pixel-office/releases)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/sharelgx/pixel-claw)](https://github.com/sharelgx/pixel-claw/releases)
 
 > 可视化你的 OpenClaw Agent 系统 —— 像素风格的 2D 办公室模拟游戏。
 
@@ -38,8 +38,8 @@
 
 ### 1. 克隆仓库
 ```bash
-git clone https://github.com/sharelgx/openclaw-pixel-office.git
-cd openclaw-pixel-office
+git clone https://github.com/sharelgx/pixel-claw.git
+cd pixel-claw
 ```
 
 ### 2. 安装 Godot
@@ -56,7 +56,7 @@ cd openclaw-pixel-office
 ## 📁 项目结构
 
 ```
-openclaw-pixel-office/
+pixel-claw/
 ├── addons/               # 插件（如有）
 ├── assets/               # 图片、音效、音乐
 │   ├── sprites/
@@ -167,7 +167,7 @@ MIT License - 详见 [LICENSE](LICENSE) 文件
 ## 📧 联系
 
 - 作者：[sharelgx](https://github.com/sharelgx)
-- 问题反馈：[Issues](https://github.com/sharelgx/openclaw-pixel-office/issues)
+- 问题反馈：[Issues](https://github.com/sharelgx/pixel-claw/issues)
 - OpenClaw 项目：https://github.com/openclaw/openclaw
 
 ---
